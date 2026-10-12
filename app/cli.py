@@ -86,6 +86,37 @@ def cmd_seed(args: argparse.Namespace) -> None:
             print(f"  create {username} ({role})")
             created += 1
 
+        from sqlmodel import select
+
+        from app.models.degree import Degree
+        from app.models.student import Student
+
+        degree = session.exec(
+            select(Degree).where(Degree.name == "Computer Science")
+        ).first()
+        if not degree:
+            degree = Degree(
+                name="Computer Science",
+                credits=93,
+                faculty="Science and Technology",
+                department="DCF",
+                requirements="3 core courses, 4 level II electives, 3 level I electives",
+            )
+            session.add(degree)
+            session.commit()
+            session.refresh(degree)
+            print("  create degree Computer Science")
+
+        bob = repo.get_by_username("bob")
+        if bob and not session.exec(
+            select(Student).where(Student.user_id == bob.id)
+        ).first():
+            session.add(
+                Student(name="Bob", degreeID=degree.degree_id, user_id=bob.id)
+            )
+            session.commit()
+            print("  create student Bob")
+
     print(f"Seed done — created {created}, skipped {skipped}.")
     print("Login with bob/bobpass or admin/adminpass")
 

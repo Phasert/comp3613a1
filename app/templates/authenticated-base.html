@@ -63,16 +63,33 @@
 {% block content %}
 <div id="wrapper">
     <nav id="sidebar" class="p-3 d-flex flex-column vh-100">
-        <div class="brand-wordmark">FastStarter</div>
+        <div class="brand-wordmark">MyAdvisor</div>
 
         <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
+            {% if user.role == 'admin' %}
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/app') }}"
-                   href="{{ url_for('user_home_view') }}">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/admin') }}"
+                   href="{{ url_for('admin_home_view') }}">
                     <span class="material-symbols-outlined me-2">home</span>
                     Home
                 </a>
             </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if nav_create|default(false) }}"
+                   href="{{ url_for('user_home_view') }}">
+                    <span class="material-symbols-outlined me-2">edit_note</span>
+                    Create plan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if nav_my_plans|default(false) }}"
+                   href="{{ url_for('current_plan_view') }}">
+                    <span class="material-symbols-outlined me-2">folder</span>
+                    My Plan
+                </a>
+            </li>
+            {% endif %}
             <li class="nav-item mt-auto">
                 <a class="nav-link d-flex align-items-center text-danger" href="{{ url_for('logout') }}">
                     <span class="material-symbols-outlined me-2">logout</span>

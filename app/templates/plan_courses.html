@@ -1,0 +1,44 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Course Selection{% endblock %}
+
+{% block subpage_content %}
+<div class="ma-panel">
+  <h1 class="h4 mb-2">Course Selection</h1>
+  {% if draft.requirements %}
+  <p class="text-muted small">Requirements: {{ draft.requirements }}</p>
+  {% endif %}
+  <p class="fw-semibold">Year {{ year }}</p>
+  <form method="post" action="{{ url_for('plan_courses_save') }}">
+    <input type="hidden" name="year" value="{{ year }}">
+    {% for semester, rows in catalog.items() %}
+    <h2 class="h6 mt-3">Semester {{ semester }}</h2>
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Course</th>
+          <th>Credits</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>
+            <input class="form-check-input" type="checkbox" name="course_id" value="{{ row.CourseID }}"
+              {% if row.CourseID in selected_ids %}checked{% endif %}>
+          </td>
+          <td>{{ row.name }}</td>
+          <td>{{ row.credits }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endfor %}
+    <p class="mb-3">Credits Obtained: {{ credits_obtained }}</p>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" type="submit" name="next" value="back">Back</button>
+      <button class="btn btn-ma-primary" type="submit" name="next" value="next">Continue</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

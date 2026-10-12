@@ -1,17 +1,17 @@
 :root {
-  /* Phase 5 theming: Guide overwrites these from docs/report.md preferences */
-  --brand-name: "FastStarter";
-  --brand-bg: #0c1218;
-  --brand-surface: #f7f4ef;
-  --brand-ink: #14202b;
-  --brand-muted: #6a7a88;
-  --brand-accent: #c45c26;
-  --brand-accent-2: #2a6f6b;
-  --brand-sidebar: #14202b;
-  --brand-sidebar-text: #a8b4bf;
-  --brand-font-display: "Fraunces", Georgia, serif;
+  /* Phase 5 theming: MyAdvisor — teal, white, grey; modern sans; academic */
+  --brand-name: "MyAdvisor";
+  --brand-bg: #f3f5f6;
+  --brand-surface: #ffffff;
+  --brand-ink: #2c3338;
+  --brand-muted: #6b757c;
+  --brand-accent: #0d9488;
+  --brand-accent-2: #0f766e;
+  --brand-sidebar: #115e59;
+  --brand-sidebar-text: #ccfbf1;
+  --brand-font-display: "Source Sans 3", "Segoe UI", sans-serif;
   --brand-font-body: "Source Sans 3", "Segoe UI", sans-serif;
-  --brand-radius: 0.85rem;
+  --brand-radius: 0.75rem;
 }
 
 *,
@@ -38,12 +38,11 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  color: var(--brand-surface);
+  color: var(--brand-ink);
   background:
-    linear-gradient(160deg, rgba(12, 18, 24, 0.55), rgba(12, 18, 24, 0.82)),
-    radial-gradient(ellipse 80% 60% at 15% 20%, rgba(42, 111, 107, 0.45), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 80%, rgba(196, 92, 38, 0.28), transparent 50%),
-    linear-gradient(180deg, #1a2834 0%, #0c1218 100%);
+    radial-gradient(ellipse 70% 50% at 90% 0%, color-mix(in srgb, var(--brand-accent) 16%, transparent), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, color-mix(in srgb, var(--brand-accent-2) 10%, transparent), transparent 50%),
+    var(--brand-bg);
   position: relative;
   overflow: hidden;
 }
@@ -57,8 +56,8 @@ body {
       -18deg,
       transparent,
       transparent 48px,
-      rgba(247, 244, 239, 0.025) 48px,
-      rgba(247, 244, 239, 0.025) 49px
+      color-mix(in srgb, var(--brand-ink) 4%, transparent) 48px,
+      color-mix(in srgb, var(--brand-ink) 4%, transparent) 49px
     );
   pointer-events: none;
 }
@@ -79,7 +78,7 @@ body {
 
 .landing-nav .brand-wordmark {
   font-size: clamp(1.4rem, 2.5vw, 1.85rem);
-  color: var(--brand-surface);
+  color: var(--brand-accent-2);
   text-decoration: none;
 }
 
@@ -101,7 +100,7 @@ body {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: color-mix(in srgb, var(--brand-surface) 65%, var(--brand-accent-2));
+  color: var(--brand-accent);
   margin: 0 0 1rem;
 }
 
@@ -109,15 +108,15 @@ body {
   font-size: clamp(3rem, 9vw, 5.5rem);
   line-height: 0.95;
   margin: 0 0 1.25rem;
-  color: var(--brand-surface);
+  color: var(--brand-ink);
 }
 
 .landing-lead {
   font-size: clamp(1.05rem, 2.2vw, 1.25rem);
   line-height: 1.55;
-  color: color-mix(in srgb, var(--brand-surface) 78%, transparent);
+  color: var(--brand-muted);
   margin: 0 0 2rem;
-  max-width: 28rem;
+  max-width: 32rem;
 }
 
 .landing-cta {
@@ -144,7 +143,7 @@ body {
 
 .btn-landing-primary {
   background: var(--brand-accent);
-  color: #fff8f3;
+  color: #fff;
 }
 
 .btn-landing-primary:hover {
@@ -153,21 +152,21 @@ body {
 }
 
 .btn-landing-ghost {
-  background: transparent;
-  color: var(--brand-surface);
-  border-color: color-mix(in srgb, var(--brand-surface) 45%, transparent);
+  background: var(--brand-surface);
+  color: var(--brand-ink);
+  border-color: color-mix(in srgb, var(--brand-ink) 18%, transparent);
 }
 
 .btn-landing-ghost:hover {
-  border-color: var(--brand-surface);
-  background: color-mix(in srgb, var(--brand-surface) 8%, transparent);
-  color: var(--brand-surface);
+  border-color: var(--brand-accent);
+  background: color-mix(in srgb, var(--brand-accent) 8%, var(--brand-surface));
+  color: var(--brand-accent-2);
 }
 
 .landing-foot {
   padding: 1.25rem clamp(1.25rem, 4vw, 3rem) 1.75rem;
   font-size: 0.85rem;
-  color: color-mix(in srgb, var(--brand-surface) 45%, transparent);
+  color: var(--brand-muted);
 }
 
 .landing-orb {
@@ -178,9 +177,9 @@ body {
   right: -6%;
   top: 18%;
   background:
-    radial-gradient(circle at 35% 35%, rgba(247, 244, 239, 0.18), transparent 55%),
-    radial-gradient(circle at 70% 70%, rgba(42, 111, 107, 0.5), transparent 60%),
-    rgba(196, 92, 38, 0.15);
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.9), transparent 55%),
+    radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--brand-accent) 45%, transparent), transparent 60%),
+    color-mix(in srgb, var(--brand-accent-2) 12%, transparent);
   filter: blur(2px);
   animation: landing-drift 14s ease-in-out infinite alternate;
   pointer-events: none;
@@ -220,8 +219,8 @@ body {
   justify-content: center;
   padding: 1.5rem;
   background:
-    radial-gradient(ellipse at top left, color-mix(in srgb, var(--brand-accent-2) 35%, transparent), transparent 55%),
-    radial-gradient(ellipse at bottom right, color-mix(in srgb, var(--brand-accent) 28%, transparent), transparent 50%),
+    radial-gradient(ellipse at top left, color-mix(in srgb, var(--brand-accent) 18%, transparent), transparent 55%),
+    radial-gradient(ellipse at bottom right, color-mix(in srgb, var(--brand-muted) 18%, transparent), transparent 50%),
     var(--brand-bg);
 }
 
@@ -270,4 +269,41 @@ body {
 
 .auth-back:hover {
   color: var(--brand-accent);
+}
+
+.btn-ma-primary {
+  background: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: #fff;
+}
+
+.btn-ma-primary:hover {
+  background: var(--brand-accent-2);
+  border-color: var(--brand-accent-2);
+  color: #fff;
+}
+
+.ma-panel {
+  background: var(--brand-surface);
+  border-radius: var(--brand-radius);
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(44, 51, 56, 0.08);
+  max-width: 52rem;
+}
+
+.ma-plan-card {
+  border: 1px solid color-mix(in srgb, var(--brand-muted) 35%, transparent);
+  border-radius: var(--brand-radius);
+  padding: 1.25rem;
+  max-width: 22rem;
+  background: var(--brand-bg);
+}
+
+.ma-status {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-muted) 18%, var(--brand-surface));
+  color: var(--brand-ink);
+  font-size: 0.85rem;
 }

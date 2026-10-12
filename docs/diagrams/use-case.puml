@@ -1,0 +1,33 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam actorBorderColor #1B365D
+skinparam actorFontColor #1E232D
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam usecaseBorderColor #1B365D
+skinparam usecaseFontColor #1E232D
+skinparam rectangleBorderColor #1B365D
+skinparam rectangleBackgroundColor #F8FAFC
+skinparam arrowColor #1B365D
+
+actor "Student" as Student
+
+rectangle "MyAdvisor" {
+  usecase "Create plan" as Create_plan
+  usecase "Submit plan" as Submit_plan
+  usecase "View student plan" as View_student_plan
+  usecase "Review advisor decision" as Review_advisor_decision
+  usecase "Review submitted plan" as Review_submitted_plan
+  usecase "Record approval or rejection" as Record_approval_or_rejection
+}
+
+actor "Advisor" as Advisor
+
+Student --> Create_plan
+Submit_plan ..> Create_plan : <<extend>>
+Student --> View_student_plan
+Student --> Review_advisor_decision
+Review_submitted_plan <-- Advisor
+Record_approval_or_rejection ..> Review_submitted_plan : <<extend>>
+
+@enduml

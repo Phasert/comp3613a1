@@ -1,0 +1,38 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Plan Details{% endblock %}
+
+{% block subpage_content %}
+<div class="ma-panel">
+  <h1 class="h4 mb-3">Plan Details</h1>
+  <form method="post" action="{{ url_for('plan_details_save') }}">
+    <div class="mb-3">
+      <label class="form-label" for="faculty">Select Faculty</label>
+      <select class="form-select" id="faculty" name="faculty" required>
+        {% for degree in degrees %}
+        <option value="{{ degree.faculty }}" {% if draft.faculty == degree.faculty %}selected{% endif %}>{{ degree.faculty }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="department">Select Department</label>
+      <select class="form-select" id="department" name="department" required>
+        {% for degree in degrees %}
+        <option value="{{ degree.department }}" {% if draft.department == degree.department %}selected{% endif %}>{{ degree.department }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="degree_id">Select Degree</label>
+      <select class="form-select" id="degree_id" name="degree_id" required>
+        {% for degree in degrees %}
+        <option value="{{ degree.degree_id }}" {% if draft.degree_id == degree.degree_id %}selected{% endif %}>{{ degree.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% if degrees %}
+    <p class="text-muted small mb-4">Requirements: {{ degrees[0].requirements }}</p>
+    {% endif %}
+    <button class="btn btn-ma-primary" type="submit">Continue</button>
+  </form>
+</div>
+{% endblock %}

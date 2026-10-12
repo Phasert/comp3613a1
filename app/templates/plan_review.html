@@ -1,0 +1,37 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Review{% endblock %}
+
+{% block subpage_content %}
+<div class="ma-panel">
+  <h1 class="h4 mb-3">Review</h1>
+  {% for year, rows in years.items() %}
+  <h2 class="h6">Year {{ year }}</h2>
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th>Semester</th>
+        <th>Course</th>
+        <th>Credits</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.semester }}</td>
+        <td>{{ row.name }}</td>
+        <td>{{ row.credits }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+  <p class="fw-semibold">Total Credits Obtained: {{ total_credits }}</p>
+  <form method="post" action="{{ url_for('create_plan_save') }}" class="d-flex flex-wrap gap-2">
+    <input type="hidden" name="degree_id" value="{{ draft.degree_id or 0 }}">
+    <input type="hidden" name="courses" value="{{ courses_json }}">
+    <a class="btn btn-outline-secondary" href="{{ url_for('plan_courses_view') }}?year=3">Back</a>
+    <button class="btn btn-outline-secondary" type="submit" name="action" value="save">Save</button>
+    <button class="btn btn-ma-primary" type="submit" name="action" value="submit">Submit for Approval</button>
+  </form>
+</div>
+{% endblock %}
