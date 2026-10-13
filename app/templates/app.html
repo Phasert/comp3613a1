@@ -1,21 +1,37 @@
 {% extends "authenticated-base.html" %}
-{% block title %}Create plan{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block subpage_content %}
-<div class="ma-panel">
-  <h1 class="h4 mb-4">Welcome {{ student.name if student else user.username }}</h1>
-  <p>
-    <a class="btn btn-ma-primary" href="{{ url_for('create_plan_start') }}">Create New Plan</a>
+<div class="ma-panel ma-panel-wide">
+  <h1 class="h2 mb-4">Welcome {{ student.name if student else user.username }}</h1>
+  <p class="mb-5">
+    <a class="btn btn-ma-primary btn-lg" href="{{ url_for('create_plan_start') }}">Create New Plan</a>
   </p>
+
+  <h2 class="h5 mb-3">Current Plan</h2>
   {% if plan %}
-  <div class="ma-plan-card">
-    <p class="mb-1 fw-semibold">Year {{ plan_year }} Plan</p>
-    <p class="text-muted small mb-2">created {{ plan.date }}</p>
-    <p class="mb-3"><span class="ma-status">{{ plan.status }}</span></p>
-    <div class="d-flex gap-2">
-      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('current_plan_view') }}">View Plan</a>
-      <a class="btn btn-sm btn-ma-primary" href="{{ url_for('create_plan_start') }}">Continue</a>
+  <div class="ma-plan-card-wide">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+      <div>
+        <p class="ma-plan-title mb-1">Year {{ plan_year }} Plan</p>
+        <p class="text-muted mb-0">Created: {{ plan.date }}</p>
+        {% if plan.minor %}
+        <p class="text-muted mb-0">Minor: {{ plan.minor }}</p>
+        {% endif %}
+      </div>
+      <p class="mb-0"><span class="ma-status">{{ plan.status }}</span></p>
     </div>
+    <div class="d-flex flex-wrap gap-2 mt-4">
+      <a class="btn btn-outline-secondary" href="{{ url_for('current_plan_view').include_query_params(plan_id=plan.plan_id) }}">View Plan</a>
+      {% if plan.status == 'not submitted' %}
+      <a class="btn btn-ma-primary" href="{{ url_for('plan_continue_view').include_query_params(plan_id=plan.plan_id, to='review') }}">Continue</a>
+      {% endif %}
+      <a class="btn btn-outline-secondary" href="{{ url_for('my_plans_view') }}">All plans</a>
+    </div>
+  </div>
+  {% else %}
+  <div class="ma-plan-card-wide">
+    <p class="text-muted mb-0">No plan yet — create your first plan to get started.</p>
   </div>
   {% endif %}
 </div>

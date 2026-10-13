@@ -1,0 +1,71 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Query{% endblock %}
+
+{% macro query_table(rows, show_response, empty_text) %}
+  {% if rows %}
+  <table class="table ma-course-table align-middle">
+    <thead>
+      <tr>
+        <th>Asked by</th>
+        <th>Student</th>
+        <th>Plan</th>
+        <th>Reason</th>
+        {% if show_response %}<th>Response</th>{% endif %}
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.asked_by }}</td>
+        <td>{{ row.student.name if row.student else "—" }}</td>
+        <td>{{ row.plan.date if row.plan else "—" }}</td>
+        <td>{{ row.query.question }}</td>
+        {% if show_response %}<td>{{ row.query.response or "—" }}</td>{% endif %}
+        <td>
+          <span class="ma-status {{ 'ma-status-ok' if row.query.progress == 'answered' }}">{{ row.query.progress }}</span>
+        </td>
+        <td>
+          {% if row.query.progress == "open" %}
+          <a class="btn btn-sm btn-ma-primary"
+             href="{{ url_for('advisor_assistance_view', query_id=row.query.query_id) }}">Answer</a>
+          {% else %}
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{{ url_for('advisor_assistance_view', query_id=row.query.query_id) }}">View</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-muted">{{ empty_text }}</p>
+  {% endif %}
+{% endmacro %}
+
+{% block subpage_content %}
+<div class="ma-panel ma-panel-wide">
+  <h1 class="h3 mb-1">Queries</h1>
+  <p class="text-muted mb-4">Questions from students about a reviewed plan, and help requests between advisors.</p>
+
+  {% set questions = queries | selectattr("kind", "equalto", "question") | list %}
+  {% set help = queries | selectattr("kind", "equalto", "assistance") | list %}
+  {% set open_q = questions | selectattr("query.progress", "equalto", "open") | list %}
+  {% set done_q = questions | selectattr("query.progress", "equalto", "answered") | list %}
+  {% set open_h = help | selectattr("query.progress", "equalto", "open") | list %}
+  {% set done_h = help | selectattr("query.progress", "equalto", "answered") | list %}
+
+  <h2 class="h5 mb-3">Student questions ({{ questions | length }})</h2>
+  <h3 class="h6 text-uppercase text-muted mb-2">Waiting on a response ({{ open_q | length }})</h3>
+  {{ query_table(open_q, false, "No student questions are waiting.") }}
+  <h3 class="h6 text-uppercase text-muted mb-2 mt-4">Answered ({{ done_q | length }})</h3>
+  {{ query_table(done_q, true, "No student questions answered yet.") }}
+
+  <h2 class="h5 mb-3 mt-5">Assistance requests ({{ help | length }})</h2>
+  <h3 class="h6 text-uppercase text-muted mb-2">Waiting on assistance ({{ open_h | length }})</h3>
+  {{ query_table(open_h, false, "No help requests are waiting.") }}
+  <h3 class="h6 text-uppercase text-muted mb-2 mt-4">Answered ({{ done_h | length }})</h3>
+  {{ query_table(done_h, true, "No assistance requests answered yet.") }}
+</div>
+{% endblock %}

@@ -34,7 +34,15 @@ async def login_action_ajax(
         )
 
     user = user_repo.get_by_username(username)
-    dest = "admin_home_view" if user and user.role == "admin" else "user_home_view"
+    from app.repositories.advisor import AdvisorRepository
+
+    is_advisor = AdvisorRepository(db).get_by_user_id(user.id) is not None
+    if is_advisor:
+        dest = "advisor_home_view"
+    elif user.role == "admin":
+        dest = "admin_home_view"
+    else:
+        dest = "user_home_view"
     response = RedirectResponse(
         url=request.url_for(dest),
         status_code=status.HTTP_303_SEE_OTHER,

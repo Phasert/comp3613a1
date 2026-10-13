@@ -2,37 +2,133 @@
 {% block title %}Plan Details{% endblock %}
 
 {% block subpage_content %}
-<div class="ma-panel">
-  <h1 class="h4 mb-3">Plan Details</h1>
+<div class="ma-panel ma-panel-wide">
+  <h1 class="h3 mb-1">Plan Details</h1>
+  <p class="text-muted mb-4">Choose your faculty, department and degree programme, then an optional minor.</p>
   <form method="post" action="{{ url_for('plan_details_save') }}">
-    <div class="mb-3">
-      <label class="form-label" for="faculty">Select Faculty</label>
-      <select class="form-select" id="faculty" name="faculty" required>
-        {% for degree in degrees %}
-        <option value="{{ degree.faculty }}" {% if draft.faculty == degree.faculty %}selected{% endif %}>{{ degree.faculty }}</option>
-        {% endfor %}
-      </select>
+    <div class="ma-form-grid">
+      <div class="mb-3">
+        <label class="form-label" for="faculty">Select Faculty</label>
+        <select class="form-select" id="faculty" name="faculty" required>
+          <option value="" disabled {% if not draft.faculty %}selected{% endif %}>Choose a faculty…</option>
+          {% for faculty in faculties %}
+          <option value="{{ faculty }}" {% if draft.faculty == faculty %}selected{% endif %}>{{ faculty }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="department">Select Department</label>
+        <select class="form-select" id="department" name="department" required>
+          <option value="" disabled {% if not draft.department %}selected{% endif %}>Choose a department…</option>
+          {% for department in departments %}
+          <option value="{{ department.name }}" data-faculty="{{ department.faculty }}"
+                  {% if draft.department == department.name %}selected{% endif %}>{{ department.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="degree_id">Select Degree (Major)</label>
+        <select class="form-select" id="degree_id" name="degree_id" required data-requirements-target>
+          <option value="" disabled {% if not draft.degree_id %}selected{% endif %}>Choose a degree…</option>
+          {% for degree in degrees %}
+          <option value="{{ degree.degree_id }}"
+                  data-faculty="{{ degree.faculty }}"
+                  data-department="{{ degree.department }}"
+                  data-requirements="{{ degree.requirements }}"
+                  {% if draft.degree_id == degree.degree_id %}selected{% endif %}>{{ degree.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="minor">Minor</label>
+        <input class="form-control" id="minor" name="minor" value="{{ draft.minor }}"
+               placeholder="e.g. Finance (leave blank for none)">
+      </div>
     </div>
-    <div class="mb-3">
-      <label class="form-label" for="department">Select Department</label>
-      <select class="form-select" id="department" name="department" required>
-        {% for degree in degrees %}
-        <option value="{{ degree.department }}" {% if draft.department == degree.department %}selected{% endif %}>{{ degree.department }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="degree_id">Select Degree</label>
-      <select class="form-select" id="degree_id" name="degree_id" required>
-        {% for degree in degrees %}
-        <option value="{{ degree.degree_id }}" {% if draft.degree_id == degree.degree_id %}selected{% endif %}>{{ degree.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    {% if degrees %}
-    <p class="text-muted small mb-4">Requirements: {{ degrees[0].requirements }}</p>
-    {% endif %}
+    <p class="text-muted mb-4" id="requirements-line">
+      Requirements: <span data-requirements-text></span>
+    </p>
     <button class="btn btn-ma-primary" type="submit">Continue</button>
   </form>
 </div>
+{% endblock %}
+
+{% block subpage_scripts %}
+<script>
+  (function () {
+    const facultySelect = document.getElementById("faculty");
+    const departmentSelect = document.getElementById("department");
+    const degreeSelect = document.getElementById("degree_id");
+    const minorInput = document.getElementById("minor");
+    const requirementsText = document.querySelector("[data-requirements-text]");
+    const MINOR_REQUIRED = 2;
+    const MINOR_LEVEL_II_REDUCTION = 2;
+
+    function optionValues(select, attribute, value) {
+      return Array.from(select.options).filter(function (option) {
+        return !option.disabled && option.value &&
+          (!attribute || option.dataset[attribute] === value);
+      });
+    }
+
+    function showOnly(select, attribute, value) {
+      let firstVisible = null;
+      Array.from(select.options).forEach(function (option) {
+        if (!option.value) return; /* keep the placeholder */
+        const hidden = attribute && option.dataset[attribute] !== value;
+        option.hidden = hidden;
+        option.disabled = hidden;
+        if (!hidden && !firstVisible) firstVisible = option;
+      });
+      if (firstVisible && select.selectedOptions[0] && select.selectedOptions[0].hidden) {
+        select.value = firstVisible.value;
+      }
+    }
+
+    function updateRequirements() {
+      const option = degreeSelect.selectedOptions[0];
+      if (!option || !option.value || !requirementsText) {
+        if (requirementsText) requirementsText.textContent = "";
+        return;
+      }
+      const minor = (minorInput && minorInput.value || "").trim();
+      const text = option.dataset.requirements || "";
+      if (!minor) {
+        requirementsText.textContent = text;
+        return;
+      }
+      /* reflect the minor rule in the requirement text: Level II -2, +2 minor courses */
+      const adjusted = text
+        .replace(/(\d+)\s+level II electives/i, function (match, count) {
+          const reduced = Math.max(parseInt(count, 10) - MINOR_LEVEL_II_REDUCTION, 0);
+          return reduced + " level II electives";
+        })
+        .replace(/\s*;\s*$/, "");
+      requirementsText.textContent =
+        adjusted + ", " + MINOR_REQUIRED + " minor courses (for " + minor + ")";
+    }
+
+    function onFacultyChange() {
+      showOnly(departmentSelect, "faculty", facultySelect.value);
+      onDepartmentChange();
+    }
+
+    function onDepartmentChange() {
+      showOnly(degreeSelect, "department", departmentSelect.value);
+      updateRequirements();
+    }
+
+    facultySelect.addEventListener("change", onFacultyChange);
+    departmentSelect.addEventListener("change", onDepartmentChange);
+    degreeSelect.addEventListener("change", updateRequirements);
+    if (minorInput) minorInput.addEventListener("input", updateRequirements);
+
+    /* apply the saved state on first render */
+    if (facultySelect.value) onFacultyChange();
+    else showOnly(departmentSelect, "faculty", "__none__");
+    if (departmentSelect.value) onDepartmentChange();
+    else showOnly(degreeSelect, "department", "__none__");
+    updateRequirements();
+  })();
+</script>
 {% endblock %}

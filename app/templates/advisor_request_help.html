@@ -1,0 +1,66 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Request help{% endblock %}
+
+{% block subpage_content %}
+<div class="ma-panel ma-panel-wide">
+  <h1 class="h3 mb-4">Request Help</h1>
+  <div class="ma-plan-card-wide mb-4">
+    <p class="ma-plan-title mb-1">{{ opened.student.name }}</p>
+    <p class="text-muted mb-0">{{ opened.plan.date }} · {{ opened.degree.name }}
+      {% if opened.plan.minor %} · Minor: {{ opened.plan.minor }}{% endif %}</p>
+  </div>
+
+  <form method="post" action="{{ url_for('advisor_request_help_save', plan_id=opened.plan.plan_id) }}">
+    <div class="mb-3">
+      <label class="form-label" for="faculty">Faculty</label>
+      <select class="form-select" id="faculty" name="faculty">
+        {% for faculty in faculties %}
+        <option value="{{ faculty }}" {% if faculty == advisor.faculty %}selected{% endif %}>{{ faculty }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="advisor_staff_id">Advisor</label>
+      <select class="form-select" id="advisor_staff_id" name="advisor_staff_id">
+        {% for person in advisers %}
+        <option value="{{ person.staff_id }}" data-faculty="{{ person.faculty }}"
+                {% if person.staff_id == advisor.staff_id %}selected{% endif %}>{{ person.name }} ({{ person.faculty }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-4">
+      <label class="form-label" for="reason">Reason</label>
+      <textarea class="form-control" id="reason" name="reason" rows="4" required></textarea>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{{ url_for('advisor_review_view', plan_id=opened.plan.plan_id) }}">Cancel</a>
+      <button class="btn btn-ma-primary" type="submit">Submit</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block subpage_scripts %}
+<script>
+  /* Keep the advisor list in step with the faculty chosen above. */
+  (function () {
+    const facultySelect = document.getElementById("faculty");
+    const advisorSelect = document.getElementById("advisor_staff_id");
+    if (!facultySelect || !advisorSelect) return;
+    function filter() {
+      let firstVisible = null;
+      Array.from(advisorSelect.options).forEach(function (option) {
+        const hidden = option.dataset.faculty !== facultySelect.value;
+        option.hidden = hidden;
+        option.disabled = hidden;
+        if (!hidden && !firstVisible) firstVisible = option;
+      });
+      if (advisorSelect.selectedOptions[0] && advisorSelect.selectedOptions[0].hidden) {
+        advisorSelect.value = firstVisible ? firstVisible.value : "";
+      }
+    }
+    facultySelect.addEventListener("change", filter);
+    filter();
+  })();
+</script>
+{% endblock %}

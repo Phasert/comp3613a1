@@ -1,0 +1,117 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Review plan{% endblock %}
+
+{% block subpage_content %}
+<div class="ma-panel ma-panel-wide">
+  <div class="ma-plan-card-wide mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+      <div>
+        <p class="ma-plan-title mb-1">{{ opened.student.name }}</p>
+        <p class="text-muted mb-0">{{ opened.plan.date }} · {{ opened.degree.name }}
+          {% if opened.plan.minor %} · Minor: {{ opened.plan.minor }}{% endif %}</p>
+      </div>
+      <p class="mb-0"><span class="ma-status">{{ opened.plan.status }}</span></p>
+    </div>
+  </div>
+
+  {% if opened.latest_query %}
+  {% set asker = opened.latest_query.requester %}
+  <div class="ma-requirements mb-4">
+    {% if opened.latest_query.kind == "question" %}
+    <h2 class="h6 text-uppercase text-muted mb-2">Student asked</h2>
+    {% else %}
+    <h2 class="h6 text-uppercase text-muted mb-2">Assistance</h2>
+    {% endif %}
+    {% if opened.latest_query.kind != "question" and asker %}
+    <p class="mb-1">
+      <span class="fw-semibold">Waiting on assistance from:</span>
+      {{ asker.name }}{% if asker.faculty %} — {{ asker.faculty }}{% endif %}
+    </p>
+    {% endif %}
+    <p class="mb-1">
+      <span class="fw-semibold">{% if opened.latest_query.kind == "question" %}Question:{% else %}Asked:{% endif %}</span>
+      {{ opened.latest_query.query.question }}
+    </p>
+    {% if opened.latest_query.query.response %}
+    <p class="mb-0"><span class="fw-semibold">Answered:</span> {{ opened.latest_query.query.response }}</p>
+    {% elif opened.latest_query.kind == "question" %}
+    <p class="mb-0"><span class="ma-status">waiting on a response</span></p>
+    {% else %}
+    <p class="mb-0"><span class="ma-status">waiting on assistance</span></p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('advisor_review_save', plan_id=opened.plan.plan_id) }}">
+    {% for group in opened.groups %}
+    <details class="ma-year" open>
+      <summary>
+        <span class="material-symbols-outlined ma-chevron">expand_more</span>
+        <span class="ma-year-title">Year {{ group.year }}</span>
+      </summary>
+      {% for semester in group.semesters %}
+      <div class="ma-semester">
+        <div class="ma-semester-head">
+          <span class="fw-semibold">Semester {{ semester.label }}</span>
+        </div>
+        <table class="table ma-course-table align-middle">
+          <thead>
+            <tr>
+              <th>Course code</th>
+              <th>Course name</th>
+              <th class="col-credits">Credits</th>
+              <th class="col-type">Course type</th>
+              <th class="col-level">Level</th>
+              <th class="col-status">Status</th>
+              <th class="col-decision">Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in semester.rows %}
+            <tr>
+              <td>{{ row.code }}</td>
+              <td>{{ row.name }}</td>
+              <td class="col-credits">{{ row.credits }}</td>
+              <td class="col-type">{{ row.type }}</td>
+              <td class="col-level">{{ row.level }}</td>
+              <td class="col-status">{{ row.status }}</td>
+              <td class="col-decision">
+                {% if row.status == "Passed" %}
+                <select class="form-select form-select-sm" disabled aria-label="Already passed">
+                  {% for option in decisions %}
+                  <option value="{{ option }}" {% if row.decision == option %}selected{% endif %}>
+                    {{ option if option else "— locked (course passed) —" }}
+                  </option>
+                  {% endfor %}
+                </select>
+                {% else %}
+                <select class="form-select form-select-sm" name="decision_{{ row.id }}">
+                  {% for option in decisions %}
+                  <option value="{{ option }}" {% if row.decision == option %}selected{% endif %}>
+                    {{ option if option else "— no decision —" }}
+                  </option>
+                  {% endfor %}
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+    </details>
+    {% endfor %}
+
+    <div class="mb-3">
+      <label class="form-label" for="note">Advisor notes</label>
+      <textarea class="form-control" id="note" name="note" rows="3">{{ opened.review.note if opened.review else "" }}</textarea>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-ma-primary" type="submit" name="intent" value="submit">Submit</button>
+      <button class="btn btn-outline-secondary" type="submit" name="intent" value="help">Request Help</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

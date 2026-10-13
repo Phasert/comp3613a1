@@ -10,3 +10,12 @@ class Degree(SQLModel, table=True):
     faculty: str = ""
     department: str = ""
     requirements: str = ""
+
+    # --- student-build:snippet Degree-requirements ---
+    # TODO: numeric requirement counts for the Review "courses still needed"
+    # lines (Core / Level I / Level II). PlanService.requirements_summary
+    core_required: int = Field(default=0)
+    level1_required: int = Field(default=0)
+    level2_required: int = Field(default=0)
+    # reads `core_required`, `level1_required`, `level2_required`.
+    # --- end snippet ---

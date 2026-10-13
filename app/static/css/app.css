@@ -299,6 +299,248 @@ body {
   background: var(--brand-bg);
 }
 
+.ma-plan-card-wide {
+  border: 1px solid color-mix(in srgb, var(--brand-muted) 35%, transparent);
+  border-radius: var(--brand-radius);
+  padding: 2rem;
+  width: 100%;
+  background: var(--brand-bg);
+}
+
+.ma-plan-title {
+  font-family: var(--brand-font-display);
+  font-weight: 650;
+  font-size: 1.5rem;
+}
+
+/* —— Phase 5 redesign: full-width plan screens —— */
+.ma-panel-wide {
+  max-width: none;
+  padding: 2rem clamp(1.25rem, 3vw, 2.5rem) 2.5rem;
+}
+
+.ma-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0 1.5rem;
+}
+
+.ma-year-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ma-year-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--brand-font-display);
+  font-weight: 650;
+  font-size: 1.2rem;
+}
+
+.ma-year-badge form {
+  margin: 0;
+}
+
+.ma-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface));
+  color: var(--brand-accent-2);
+  cursor: pointer;
+}
+
+.ma-icon-btn:hover {
+  background: color-mix(in srgb, var(--brand-accent) 24%, var(--brand-surface));
+}
+
+.ma-icon-btn-danger {
+  border-color: color-mix(in srgb, #dc3545 45%, transparent);
+  background: color-mix(in srgb, #dc3545 10%, var(--brand-surface));
+  color: #b02a37;
+}
+
+.ma-icon-btn-danger:hover {
+  background: color-mix(in srgb, #dc3545 22%, var(--brand-surface));
+}
+
+.ma-icon-btn .material-symbols-outlined {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.ma-semester {
+  padding: 0 0 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.ma-semester summary,
+.ma-semester-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0.45rem 0.85rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+  border-radius: calc(var(--brand-radius) - 0.25rem);
+  background: var(--brand-accent);
+  color: #fff;
+}
+
+.ma-semester summary .text-muted,
+.ma-semester-head .text-muted {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.ma-semester summary::-webkit-details-marker {
+  display: none;
+}
+
+.ma-semester-body.ma-collapsed {
+  display: none;
+}
+
+.ma-semester-toggle .ma-chevron {
+  transition: transform 0.2s ease;
+}
+
+.ma-semester-toggle.ma-collapsed .ma-chevron {
+  transform: rotate(-90deg);
+}
+
+.ma-semester-toggle {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.5rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 1.05rem;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ma-semester summary .ma-chevron,
+.ma-semester-head .ma-chevron {
+  color: #fff;
+}
+
+.ma-semester summary .ma-icon-btn,
+.ma-semester-head .ma-icon-btn {
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.ma-semester summary .ma-icon-btn:hover,
+.ma-semester-head .ma-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.ma-semester-add {
+  margin-top: 1.5rem;
+  padding: 0 0.25rem;
+  color: var(--brand-muted);
+}
+
+.ma-semester-add .form-control {
+  max-width: 16rem;
+}
+
+.ma-year {
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 35%, transparent);
+  border-radius: var(--brand-radius);
+  background: var(--brand-surface);
+  padding: 0.75rem 1.25rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.ma-year summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  cursor: pointer;
+  padding: 0.35rem 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.ma-year summary::-webkit-details-marker,
+.ma-year summary::marker {
+  display: none;
+  content: "";
+}
+
+.ma-year-title {
+  font-family: var(--brand-font-display);
+  font-weight: 650;
+  font-size: 1.2rem;
+}
+
+.ma-chevron {
+  transition: transform 0.2s ease;
+  color: var(--brand-accent);
+}
+
+.ma-semester[open] .ma-chevron {
+  transform: rotate(180deg);
+}
+
+.ma-course-table {
+  margin-bottom: 0.5rem;
+}
+
+.ma-course-table th {
+  font-weight: 600;
+  color: var(--brand-muted);
+  white-space: nowrap;
+}
+
+.ma-course-table td,
+.ma-course-table th {
+  padding: 0.5rem 0.6rem;
+  vertical-align: middle;
+}
+
+.ma-course-table .col-code {
+  min-width: 10rem;
+}
+
+.ma-course-table .col-credits {
+  width: 6.5rem;
+}
+
+.ma-course-table .col-type {
+  width: 8.5rem;
+}
+
+.ma-course-table .col-level {
+  width: 7rem;
+}
+
+.ma-course-table .col-status {
+  width: 9rem;
+}
+
+.ma-course-table .col-row-actions {
+  width: 3rem;
+}
+
 .ma-status {
   display: inline-block;
   padding: 0.15rem 0.55rem;
@@ -306,4 +548,63 @@ body {
   background: color-mix(in srgb, var(--brand-muted) 18%, var(--brand-surface));
   color: var(--brand-ink);
   font-size: 0.85rem;
+}
+
+.ma-status-ok {
+  background: color-mix(in srgb, var(--brand-accent) 18%, var(--brand-surface));
+  color: var(--brand-accent-2);
+}
+
+.ma-requirements {
+  border: 1px solid color-mix(in srgb, var(--brand-muted) 30%, transparent);
+  border-radius: var(--brand-radius);
+  padding: 1.25rem 1.5rem;
+  background: var(--brand-bg);
+}
+
+.ma-progress {
+  height: 1.1rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-muted) 22%, var(--brand-surface));
+}
+
+.ma-progress .progress-bar {
+  background: var(--brand-accent);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ma-panel-narrow {
+  max-width: 40rem;
+}
+
+.ma-counter {
+  border: 1px solid color-mix(in srgb, var(--brand-muted) 35%, transparent);
+  border-radius: var(--brand-radius);
+  padding: 1.5rem 2rem;
+  width: 100%;
+  background: var(--brand-bg);
+  text-align: left;
+}
+
+.ma-counter-value {
+  font-family: var(--brand-font-display);
+  font-size: 2.75rem;
+  font-weight: 650;
+  line-height: 1;
+  color: var(--brand-accent-2);
+  margin: 0 0 0.35rem;
+}
+
+.ma-counter-label {
+  color: var(--brand-muted);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+}
+
+.ma-course-table .col-decision {
+  width: 12rem;
 }

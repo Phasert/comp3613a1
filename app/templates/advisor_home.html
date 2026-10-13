@@ -1,0 +1,63 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Advisor home{% endblock %}
+
+{% block subpage_content %}
+<div class="ma-panel ma-panel-wide">
+  <h1 class="h3 mb-1">Welcome {{ advisor.name }}</h1>
+  <p class="text-muted mb-4">Faculty: {{ advisor.faculty }}</p>
+
+  <div class="row g-3 mb-5">
+    <div class="col-12 col-md-4">
+      <div class="ma-counter">
+        <p class="ma-counter-value">{{ counts.pending }}</p>
+        <p class="ma-counter-label">Pending Review</p>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="ma-counter">
+        <p class="ma-counter-value">{{ counts.reviewed }}</p>
+        <p class="ma-counter-label">Reviewed</p>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="ma-counter">
+        <p class="ma-counter-value">{{ counts.resubmitted }}</p>
+        <p class="ma-counter-label">Resubmitted</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="h5 mb-3">Submissions</h2>
+  {% if queue %}
+  <table class="table ma-course-table align-middle">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Plan</th>
+        <th>Degree</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in queue %}
+      <tr>
+        <td>{{ row.student.name }}</td>
+        <td>{{ row.year_label }} ({{ row.course_count }} courses)</td>
+        <td>{{ row.degree.name }}</td>
+        <td>{{ row.plan.date }}</td>
+        <td><span class="ma-status {{ 'ma-status-ok' if row.state == 'reviewed' }}">{{ row.state }}</span></td>
+        <td>
+          <a class="btn btn-sm btn-ma-primary"
+             href="{{ url_for('advisor_review_view', plan_id=row.plan.plan_id) }}">Review Plan</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-muted">No plans have been submitted for your faculty yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

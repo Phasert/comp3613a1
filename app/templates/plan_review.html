@@ -2,34 +2,91 @@
 {% block title %}Review{% endblock %}
 
 {% block subpage_content %}
-<div class="ma-panel">
-  <h1 class="h4 mb-3">Review</h1>
-  {% for year, rows in years.items() %}
-  <h2 class="h6">Year {{ year }}</h2>
-  <table class="table table-sm">
-    <thead>
-      <tr>
-        <th>Semester</th>
-        <th>Course</th>
-        <th>Credits</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in rows %}
-      <tr>
-        <td>{{ row.semester }}</td>
-        <td>{{ row.name }}</td>
-        <td>{{ row.credits }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="ma-panel ma-panel-wide">
+  <h1 class="h3 mb-1">Review</h1>
+  <p class="text-muted mb-1">
+    Major: {{ draft.degree_name or "—" }}{% if draft.minor %} · Minor: {{ draft.minor }}{% endif %}
+  </p>
+  {% if req_line %}
+  <p class="text-muted mb-4">Requirements: {{ req_line }}</p>
+  {% endif %}
+
+  {% for year, semesters in grouped %}
+  <details class="ma-year" open>
+    <summary>
+      <span class="material-symbols-outlined ma-chevron">expand_more</span>
+      <span class="ma-year-title">Year {{ year }}</span>
+      <span class="text-muted ms-auto">
+        Credits Obtained: {% if year_credits.get(year) is none %}N/A{% else %}{{ year_credits.get(year) }}{% endif %}
+      </span>
+    </summary>
+    {% for label, rows in semesters %}
+    <div class="ma-semester">
+      <div class="ma-semester-head">
+        <span class="fw-semibold">Semester {{ label }}</span>
+        <span class="text-muted ms-auto">
+          Credits Obtained: {% if semester_credits.get((year, label)) is none %}N/A{% else %}{{ semester_credits.get((year, label)) }}{% endif %}
+        </span>
+      </div>
+      <table class="table ma-course-table align-middle">
+        <thead>
+          <tr>
+            <th>Course code</th>
+            <th>Course name</th>
+            <th class="col-credits">Credits</th>
+            <th class="col-type">Course type</th>
+            <th class="col-level">Level</th>
+            <th class="col-status">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td>{{ row.code }}</td>
+            <td>{{ row.name }}</td>
+            <td class="col-credits">{{ row.credits }}</td>
+            <td class="col-type">{{ row.type }}</td>
+            <td class="col-level">{{ row.level }}</td>
+            <td class="col-status"><span class="ma-status">{{ row.status }}</span></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-muted">No courses added for this semester.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+  </details>
   {% endfor %}
-  <p class="fw-semibold">Total Credits Obtained: {{ total_credits }}</p>
+
+  <div class="ma-requirements mt-4">
+    <div class="d-flex justify-content-between align-items-baseline mb-2">
+      <h2 class="h6 text-uppercase text-muted mb-0">Courses still needed</h2>
+      <span class="fw-semibold">{{ progress.passed }} of {{ progress.required }} courses passed</span>
+    </div>
+    <div class="progress ma-progress" role="progressbar"
+         aria-valuenow="{{ progress.percent }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar bg-success" style="width: {{ progress.percent }}%">{{ progress.percent }}%</div>
+    </div>
+    <div class="mt-3">
+      {% for row in requirements %}
+    <p class="mb-1">
+      {{ row.label }}:
+      <span class="fw-semibold">{{ row.passed }} of {{ row.required }} passed</span>
+      {% if row.remaining > 0 %}
+      — <span class="ma-status">{{ row.remaining }} still needed</span>
+      {% else %}
+      — <span class="ma-status ma-status-ok">requirement met</span>
+      {% endif %}
+    </p>
+    {% endfor %}
+    </div>
+  </div>
+
+  <p class="fw-semibold mt-3">Total Credits Obtained: {% if total_credits %}{{ total_credits }}{% else %}N/A{% endif %}</p>
+
   <form method="post" action="{{ url_for('create_plan_save') }}" class="d-flex flex-wrap gap-2">
-    <input type="hidden" name="degree_id" value="{{ draft.degree_id or 0 }}">
-    <input type="hidden" name="courses" value="{{ courses_json }}">
-    <a class="btn btn-outline-secondary" href="{{ url_for('plan_courses_view') }}?year=3">Back</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('plan_courses_view') }}#year-{{ max_year }}">Back</a>
     <button class="btn btn-outline-secondary" type="submit" name="action" value="save">Save</button>
     <button class="btn btn-ma-primary" type="submit" name="action" value="submit">Submit for Approval</button>
   </form>

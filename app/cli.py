@@ -63,6 +63,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
     demo_users = [
         ("bob", "bob@example.com", "bobpass", "regular_user"),
         ("admin", "admin@example.com", "adminpass", "admin"),
+        ("advisor2", "advisor2@example.com", "advisor2pass", "advisor"),
     ]
 
     created = 0
@@ -91,21 +92,170 @@ def cmd_seed(args: argparse.Namespace) -> None:
         from app.models.degree import Degree
         from app.models.student import Student
 
+        degree_rows = [
+            # (name, credits, faculty, department, requirements, core, level1, level2)
+            (
+                "Computer Science",
+                93,
+                "Science and Technology",
+                "DCIT",
+                "3 core courses, 4 level II electives, 3 level I electives",
+                3,
+                3,
+                4,
+            ),
+            (
+                "Software Engineering",
+                96,
+                "Science and Technology",
+                "DCIT",
+                "4 core courses, 3 level II electives, 3 level I electives",
+                4,
+                3,
+                3,
+            ),
+            (
+                "Information Systems",
+                90,
+                "Science and Technology",
+                "DCIT",
+                "3 core courses, 3 level II electives, 4 level I electives",
+                3,
+                4,
+                3,
+            ),
+            (
+                "Cyber Security",
+                93,
+                "Science and Technology",
+                "DCS",
+                "4 core courses, 4 level II electives, 2 level I electives",
+                4,
+                2,
+                4,
+            ),
+            (
+                "Data Science",
+                90,
+                "Science and Technology",
+                "DCS",
+                "3 core courses, 4 level II electives, 3 level I electives",
+                3,
+                3,
+                4,
+            ),
+            (
+                "Economics",
+                90,
+                "Social Sciences",
+                "DSE",
+                "3 core courses, 3 level II electives, 4 level I electives",
+                3,
+                4,
+                3,
+            ),
+            (
+                "Management Studies",
+                90,
+                "Social Sciences",
+                "DSM",
+                "3 core courses, 4 level II electives, 3 level I electives",
+                3,
+                3,
+                4,
+            ),
+            (
+                "Psychology",
+                93,
+                "Social Sciences",
+                "DSP",
+                "4 core courses, 3 level II electives, 3 level I electives",
+                4,
+                3,
+                3,
+            ),
+            (
+                "Nursing",
+                96,
+                "Health Sciences",
+                "DHS",
+                "4 core courses, 4 level II electives, 2 level I electives",
+                4,
+                2,
+                4,
+            ),
+            (
+                "Pharmacy",
+                120,
+                "Health Sciences",
+                "DHS",
+                "5 core courses, 4 level II electives, 2 level I electives",
+                5,
+                2,
+                4,
+            ),
+            (
+                "Biotechnology",
+                93,
+                "Health Sciences",
+                "DBI",
+                "4 core courses, 3 level II electives, 3 level I electives",
+                4,
+                3,
+                3,
+            ),
+            (
+                "English Literature",
+                90,
+                "Humanities",
+                "DHL",
+                "3 core courses, 3 level II electives, 4 level I electives",
+                3,
+                4,
+                3,
+            ),
+            (
+                "History",
+                90,
+                "Humanities",
+                "DHH",
+                "3 core courses, 4 level II electives, 3 level I electives",
+                3,
+                3,
+                4,
+            ),
+        ]
+
+        existing_degrees = list(session.exec(select(Degree)).all())
+        if not existing_degrees:
+            for (
+                name,
+                credits,
+                faculty,
+                department,
+                requirements,
+                core,
+                level1,
+                level2,
+            ) in degree_rows:
+                session.add(
+                    Degree(
+                        name=name,
+                        credits=credits,
+                        faculty=faculty,
+                        department=department,
+                        requirements=requirements,
+                        core_required=core,
+                        level1_required=level1,
+                        level2_required=level2,
+                    )
+                )
+            session.commit()
+            print(f"  create {len(degree_rows)} degrees")
+
         degree = session.exec(
             select(Degree).where(Degree.name == "Computer Science")
         ).first()
-        if not degree:
-            degree = Degree(
-                name="Computer Science",
-                credits=93,
-                faculty="Science and Technology",
-                department="DCF",
-                requirements="3 core courses, 4 level II electives, 3 level I electives",
-            )
-            session.add(degree)
-            session.commit()
-            session.refresh(degree)
-            print("  create degree Computer Science")
 
         bob = repo.get_by_username("bob")
         if bob and not session.exec(
@@ -117,8 +267,42 @@ def cmd_seed(args: argparse.Namespace) -> None:
             session.commit()
             print("  create student Bob")
 
+        from app.models.advisor import Advisor
+
+        advisor_rows = [
+            # (name, faculty, login username or None)
+            ("Mr. Bob", "Science and Technology", "admin"),
+            ("Dr. Dana", "Science and Technology", None),
+            ("Dr. Omar", "Science and Technology", None),
+            ("Ms. Carol", "Social Sciences", "advisor2"),
+            ("Mr. Frank", "Social Sciences", None),
+            ("Dr. Nina", "Social Sciences", None),
+            ("Dr. Priya", "Health Sciences", None),
+            ("Ms. Grace", "Health Sciences", None),
+            ("Dr. Simon", "Health Sciences", None),
+            ("Dr. Henry", "Humanities", None),
+            ("Ms. Ivy", "Humanities", None),
+            ("Dr. Jonas", "Humanities", None),
+        ]
+        created_advisors = 0
+        for name, faculty, username in advisor_rows:
+            account = repo.get_by_username(username) if username else None
+            if account and session.exec(
+                select(Advisor).where(Advisor.user_id == account.id)
+            ).first():
+                continue
+            session.add(
+                Advisor(name=name, faculty=faculty, user_id=account.id if account else None)
+            )
+            session.commit()
+            created_advisors += 1
+            print(f"  create advisor {name} ({faculty})")
+
     print(f"Seed done — created {created}, skipped {skipped}.")
-    print("Login with bob/bobpass or admin/adminpass")
+    print(
+        "Login with bob/bobpass (student), admin/adminpass (advisor Mr. Bob), "
+        "or advisor2/advisor2pass (advisor Ms. Carol)"
+    )
 
 
 def cmd_run(args: argparse.Namespace) -> None:

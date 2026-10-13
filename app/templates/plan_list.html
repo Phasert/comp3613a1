@@ -1,0 +1,49 @@
+{% extends "authenticated-base.html" %}
+{% block title %}My Plans{% endblock %}
+
+{% block subpage_content %}
+<div class="ma-panel ma-panel-wide">
+  <div class="ma-year-head">
+    <div>
+      <h1 class="h3 mb-1">My Plans</h1>
+      <p class="text-muted mb-0">Every plan you have saved or submitted.</p>
+    </div>
+    <a class="btn btn-ma-primary" href="{{ url_for('create_plan_start') }}">Create New Plan</a>
+  </div>
+
+  {% for item in summaries %}
+  <div class="ma-plan-card-wide mb-3">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+      <div>
+        <p class="ma-plan-title mb-1">{{ item.year_label|title }}</p>
+        <p class="text-muted mb-0">
+          {% if item.degree_name %}{{ item.degree_name }}{% endif %}
+          {% if item.plan.minor %} · Minor: {{ item.plan.minor }}{% endif %}
+        </p>
+        <p class="text-muted mb-0">
+          Created: {{ item.plan.date }} · {{ item.course_count }} courses ·
+          {{ item.passed_credits }} / {{ item.total_credits }} credits obtained
+        </p>
+      </div>
+      <p class="mb-0"><span class="ma-status">{{ item.plan.status }}</span></p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-4">
+      <a class="btn btn-outline-secondary"
+         href="{{ url_for('current_plan_view').include_query_params(plan_id=item.plan.plan_id) }}">View Plan</a>
+      {% if item.can_continue %}
+      <a class="btn btn-ma-primary"
+         href="{{ url_for('plan_continue_view').include_query_params(plan_id=item.plan.plan_id, to=item.continue_to) }}">Continue</a>
+      {% endif %}
+      {% if item.can_query %}
+      <a class="btn btn-outline-secondary"
+         href="{{ url_for('plan_query_view').include_query_params(plan_id=item.plan.plan_id) }}">Query</a>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div class="ma-plan-card-wide">
+    <p class="text-muted mb-0">No plans yet — create your first plan to get started.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

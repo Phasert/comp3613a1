@@ -1,0 +1,29 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Query{% endblock %}
+
+{% block subpage_content %}
+<div class="ma-panel ma-panel-wide">
+  <h1 class="h3 mb-4">Query</h1>
+
+  <div class="ma-plan-card-wide mb-4">
+    <p class="ma-plan-title mb-1">{{ student.name if student else user.username }}</p>
+    <p class="text-muted mb-0">
+      Plan created {{ plan.date }}{% if review.advisor %} · Reviewed by {{ review.advisor }}{% endif %}
+    </p>
+  </div>
+
+  <form method="post" action="{{ url_for('plan_query_save') }}">
+    <input type="hidden" name="plan_id" value="{{ plan.plan_id }}">
+    <div class="mb-4">
+      <label class="form-label" for="question">Question</label>
+      <textarea class="form-control" id="question" name="question" rows="4" required
+                placeholder="What do you need clarified about this plan?"></textarea>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary"
+         href="{{ url_for('current_plan_view').include_query_params(plan_id=plan.plan_id) }}">Back</a>
+      <button class="btn btn-ma-primary" type="submit">Submit</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

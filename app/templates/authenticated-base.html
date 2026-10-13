@@ -15,7 +15,11 @@
     #sidebar {
         min-width: 250px;
         max-width: 250px;
-        min-height: 100vh;
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+        height: 100vh;
+        overflow-y: auto;
         transition: all 0.3s;
         background: var(--brand-sidebar);
         color: #fff;
@@ -66,7 +70,29 @@
         <div class="brand-wordmark">MyAdvisor</div>
 
         <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
-            {% if user.role == 'admin' %}
+            {% if user.role == 'advisor' or nav_advisor_home|default(false) or nav_advisor_review|default(false) or nav_advisor_query|default(false) %}
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if nav_advisor_home|default(false) }}"
+                   href="{{ url_for('advisor_home_view') }}">
+                    <span class="material-symbols-outlined me-2">home</span>
+                    Home
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if nav_advisor_review|default(false) }}"
+                   href="{{ url_for('advisor_home_view') }}">
+                    <span class="material-symbols-outlined me-2">rate_review</span>
+                    Review Plan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if nav_advisor_query|default(false) }}"
+                   href="{{ url_for('advisor_query_list_view') }}">
+                    <span class="material-symbols-outlined me-2">question_answer</span>
+                    Query
+                </a>
+            </li>
+            {% elif user.role == 'admin' %}
             <li class="nav-item">
                 <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/admin') }}"
                    href="{{ url_for('admin_home_view') }}">
@@ -76,15 +102,22 @@
             </li>
             {% else %}
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center {{ 'active' if nav_create|default(false) }}"
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path == '/app' }}"
                    href="{{ url_for('user_home_view') }}">
+                    <span class="material-symbols-outlined me-2">home</span>
+                    Home
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if nav_create|default(false) }}"
+                   href="{{ url_for('plan_details_view') }}">
                     <span class="material-symbols-outlined me-2">edit_note</span>
                     Create plan
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link d-flex align-items-center {{ 'active' if nav_my_plans|default(false) }}"
-                   href="{{ url_for('current_plan_view') }}">
+                   href="{{ url_for('my_plans_view') }}">
                     <span class="material-symbols-outlined me-2">folder</span>
                     My Plan
                 </a>

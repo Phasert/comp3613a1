@@ -1,44 +1,213 @@
 {% extends "authenticated-base.html" %}
 {% block title %}Course Selection{% endblock %}
 
-{% block subpage_content %}
-<div class="ma-panel">
-  <h1 class="h4 mb-2">Course Selection</h1>
-  {% if draft.requirements %}
-  <p class="text-muted small">Requirements: {{ draft.requirements }}</p>
-  {% endif %}
-  <p class="fw-semibold">Year {{ year }}</p>
-  <form method="post" action="{{ url_for('plan_courses_save') }}">
+{% macro course_row(year, semester, row) %}
+<tr>
+  <td class="col-code">
     <input type="hidden" name="year" value="{{ year }}">
-    {% for semester, rows in catalog.items() %}
-    <h2 class="h6 mt-3">Semester {{ semester }}</h2>
-    <table class="table table-sm align-middle">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Course</th>
-          <th>Credits</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in rows %}
-        <tr>
-          <td>
-            <input class="form-check-input" type="checkbox" name="course_id" value="{{ row.CourseID }}"
-              {% if row.CourseID in selected_ids %}checked{% endif %}>
-          </td>
-          <td>{{ row.name }}</td>
-          <td>{{ row.credits }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <input type="hidden" name="semester" value="{{ semester }}">
+    <input class="form-control" name="code" value="{{ row.code }}" placeholder="COMP 2601">
+  </td>
+  <td><input class="form-control" name="name" value="{{ row.name }}" placeholder="Course name"></td>
+  <td class="col-credits"><input class="form-control" name="credits" value="{{ row.credits }}" inputmode="numeric"></td>
+  <td class="col-type">
+    <select class="form-select" name="type">
+      {% for course_type in course_types %}
+      <option value="{{ course_type }}" {% if row.type == course_type %}selected{% endif %}>{{ course_type }}</option>
+      {% endfor %}
+    </select>
+  </td>
+  <td class="col-level">
+    <select class="form-select" name="level">
+      {% for level in levels %}
+      <option value="{{ level }}" {% if row.level == level %}selected{% endif %}>{{ level }}</option>
+      {% endfor %}
+    </select>
+  </td>
+  <td class="col-status">
+    <select class="form-select" name="status">
+      {% for status_option in statuses %}
+      <option value="{{ status_option }}" {% if row.status == status_option %}selected{% endif %}>{{ status_option }}</option>
+      {% endfor %}
+    </select>
+  </td>
+  <td class="col-row-actions">
+    <button type="button" class="ma-icon-btn ma-icon-btn-danger row-remove" title="Remove row">
+      <span class="material-symbols-outlined">remove</span>
+    </button>
+  </td>
+</tr>
+{% endmacro %}
+
+{% block subpage_content %}
+<div class="ma-panel ma-panel-wide">
+  <div class="ma-year-head">
+    <div>
+      <h1 class="h3 mb-1">Course Selection</h1>
+      {% if req_line %}
+      <p class="text-muted mb-0">Requirements: {{ req_line }}</p>
+      {% endif %}
+      <p class="text-muted mb-0">
+        Major: {{ draft.degree_name or "—" }}
+        {% if draft.minor %} · Minor: {{ draft.minor }}{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <form method="post" action="{{ url_for('plan_courses_save') }}" id="course-form">
+    {% for section in sections %}
+    <details class="ma-year" id="year-{{ section.year }}" open>
+      <summary>
+        <span class="material-symbols-outlined ma-chevron">expand_more</span>
+        <span class="ma-year-title">Year {{ section.year }}</span>
+        {% if section.is_last %}
+        <button class="ma-icon-btn ms-1" type="submit" name="intent" value="add_year" title="Add the next year">
+          <span class="material-symbols-outlined">add</span>
+        </button>
+        {% endif %}
+        {% if section.removable %}
+        <button class="ma-icon-btn ma-icon-btn-danger ms-1" type="submit"
+                name="intent" value="remove_year:{{ section.year }}" title="Remove this year">
+          <span class="material-symbols-outlined">remove</span>
+        </button>
+        {% endif %}
+        <span class="text-muted ms-auto">
+          Credits Obtained: {% if section.credits is none %}N/A{% else %}{{ section.credits }}{% endif %}
+        </span>
+      </summary>
+
+      {% for semester in section.semesters %}
+      <div class="ma-semester">
+        <div class="ma-semester-head">
+          <button class="ma-semester-toggle" type="button" data-toggle-target="sem-{{ section.year }}-{{ loop.index }}">
+            <span class="material-symbols-outlined ma-chevron">expand_more</span>
+            <span class="fw-semibold">Semester {{ semester.label }}</span>
+          </button>
+          {% if semester.removable %}
+          <button class="ma-icon-btn ms-1" type="submit"
+                  name="intent" value="remove_semester:{{ section.year }}:{{ semester.label }}" title="Remove this semester">
+            <span class="material-symbols-outlined">remove</span>
+          </button>
+          {% endif %}
+          <span class="text-muted ms-auto">
+            Credits Obtained: {% if semester.credits is none %}N/A{% else %}{{ semester.credits }}{% endif %}
+          </span>
+        </div>
+
+        <div class="ma-semester-body" id="sem-{{ section.year }}-{{ loop.index }}">
+          <div class="table-responsive">
+            <table class="table ma-course-table align-middle mb-2">
+              <thead>
+                <tr>
+                  <th class="col-code">Course code</th>
+                  <th>Course name</th>
+                  <th class="col-credits">Credits</th>
+                  <th class="col-type">Course type</th>
+                  <th class="col-level">Level</th>
+                  <th class="col-status">Status</th>
+                  <th class="col-row-actions"></th>
+                </tr>
+              </thead>
+              <tbody id="rows-{{ section.year }}-{{ loop.index }}"
+                     data-year="{{ section.year }}" data-semester="{{ semester.label }}">
+                {% for row in semester.rows %}
+                {{ course_row(section.year, semester.label, row) }}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <button type="button" class="ma-icon-btn row-add" data-target="rows-{{ section.year }}-{{ loop.index }}"
+                  title="Add a course row">
+            <span class="material-symbols-outlined">add</span>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="ma-semester-add d-flex align-items-center gap-2">
+        <button class="ma-icon-btn" type="submit" name="intent" value="add_semester:{{ section.year }}"
+                title="Add another semester">
+          <span class="material-symbols-outlined">add</span>
+        </button>
+        <label class="form-label mb-0" for="label-{{ section.year }}">Add semester</label>
+        <input class="form-control w-auto" id="label-{{ section.year }}"
+               name="label_{{ section.year }}" placeholder="e.g. Summer">
+      </div>
+    </details>
     {% endfor %}
-    <p class="mb-3">Credits Obtained: {{ credits_obtained }}</p>
-    <div class="d-flex gap-2">
-      <button class="btn btn-outline-secondary" type="submit" name="next" value="back">Back</button>
-      <button class="btn btn-ma-primary" type="submit" name="next" value="next">Continue</button>
+
+    <div class="d-flex gap-2 mt-4">
+      <a class="btn btn-outline-secondary" href="{{ url_for('plan_details_view') }}">Back</a>
+      <button class="btn btn-ma-primary" type="submit" name="intent" value="continue">Continue</button>
     </div>
   </form>
 </div>
+
+<template id="row-template">
+  <tr>
+    <td class="col-code">
+      <input type="hidden" name="year" value="">
+      <input type="hidden" name="semester" value="">
+      <input class="form-control" name="code" value="" placeholder="COMP 2601">
+    </td>
+    <td><input class="form-control" name="name" value="" placeholder="Course name"></td>
+    <td class="col-credits"><input class="form-control" name="credits" value="" inputmode="numeric"></td>
+    <td class="col-type">
+      <select class="form-select" name="type">
+        {% for course_type in course_types %}
+        <option value="{{ course_type }}">{{ course_type }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="col-level">
+      <select class="form-select" name="level">
+        {% for level in levels %}
+        <option value="{{ level }}">{{ level }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="col-status">
+      <select class="form-select" name="status">
+        {% for status_option in statuses %}
+        <option value="{{ status_option }}">{{ status_option }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="col-row-actions">
+      <button type="button" class="ma-icon-btn ma-icon-btn-danger row-remove" title="Remove row">
+        <span class="material-symbols-outlined">remove</span>
+      </button>
+    </td>
+  </tr>
+</template>
+{% endblock %}
+
+{% block subpage_scripts %}
+<script>
+  document.addEventListener("click", function (event) {
+    const add = event.target.closest(".row-add");
+    if (add) {
+      const tbody = document.getElementById(add.dataset.target);
+      const fragment = document.getElementById("row-template").content.cloneNode(true);
+      const row = fragment.querySelector("tr");
+      row.querySelector('input[name="year"]').value = tbody.dataset.year || "";
+      row.querySelector('input[name="semester"]').value = tbody.dataset.semester || "";
+      tbody.appendChild(fragment);
+      return;
+    }
+    const remove = event.target.closest(".row-remove");
+    if (remove) {
+      remove.closest("tr").remove();
+      return;
+    }
+    const toggle = event.target.closest(".ma-semester-toggle");
+    if (toggle) {
+      const body = document.getElementById(toggle.dataset.toggleTarget);
+      if (body) {
+        body.classList.toggle("ma-collapsed");
+        toggle.classList.toggle("ma-collapsed");
+      }
+    }
+  });
+</script>
 {% endblock %}

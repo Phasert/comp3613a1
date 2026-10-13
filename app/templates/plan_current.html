@@ -1,32 +1,127 @@
 {% extends "authenticated-base.html" %}
-{% block title %}My plan{% endblock %}
+{% block title %}Plan progress{% endblock %}
 
 {% block subpage_content %}
-<div class="ma-panel">
-  <h1 class="h4 mb-2">Saved plan</h1>
-  <p class="text-muted small">{{ plan.status }} · {{ plan.date }}</p>
-  {% for year, rows in years.items() %}
-  <h2 class="h6">Year {{ year }}</h2>
-  <table class="table table-sm">
-    <thead>
-      <tr>
-        <th>Semester</th>
-        <th>Course</th>
-        <th>Credits</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in rows %}
-      <tr>
-        <td>{{ row.semester }}</td>
-        <td>{{ row.name }}</td>
-        <td>{{ row.credits }}</td>
-      </tr>
+<div class="ma-panel ma-panel-wide">
+  <div class="ma-year-head">
+    <div>
+      <h1 class="h3 mb-1">Plan progress</h1>
+      <p class="text-muted mb-0">
+        {% if degree_name %}{{ degree_name }}{% endif %}{% if plan.minor %} · Minor: {{ plan.minor }}{% endif %}
+        · {{ plan.status }} · Created: {{ plan.date }}
+      </p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{{ url_for('my_plans_view') }}">My Plans</a>
+  </div>
+
+  <div class="ma-requirements mb-4">
+    <div class="d-flex justify-content-between align-items-baseline mb-2">
+      <h2 class="h6 text-uppercase text-muted mb-0">Requirements progress</h2>
+      <span class="fw-semibold">{{ progress.passed }} of {{ progress.required }} courses passed</span>
+    </div>
+    <div class="progress ma-progress" role="progressbar"
+         aria-valuenow="{{ progress.percent }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar bg-success" style="width: {{ progress.percent }}%">{{ progress.percent }}%</div>
+    </div>
+
+    <div class="mt-4">
+      {% for row in progress.rows %}
+      <p class="mb-2">
+        {{ row.label }}:
+        <span class="fw-semibold">{{ row.passed }} of {{ row.required }} passed</span>
+        {% if row.remaining > 0 %}
+        — <span class="ma-status">{{ row.remaining }} still needed</span>
+        {% else %}
+        — <span class="ma-status ma-status-ok">requirement met</span>
+        {% endif %}
+      </p>
       {% endfor %}
-    </tbody>
-  </table>
+    </div>
+  </div>
+
+  {% if review and review.note %}
+  <div class="ma-requirements mb-4">
+    <h2 class="h6 text-uppercase text-muted mb-2">Advisor notes</h2>
+    <p class="mb-1">{{ review.note }}</p>
+    <p class="text-muted small mb-0">
+      {{ review.advisor }} · {{ review.date }}
+    </p>
+  </div>
+  {% endif %}
+
+  {% if queries %}
+  {% for asked in queries[-1:] %}
+  <div class="ma-requirements mb-4">
+    <h2 class="h6 text-uppercase text-muted mb-2">Your query</h2>
+    <p class="mb-1"><span class="fw-semibold">Question:</span> {{ asked.question }}</p>
+    {% if asked.response %}
+    <p class="mb-0"><span class="fw-semibold">Response:</span> {{ asked.response }}</p>
+    {% else %}
+    <p class="mb-0"><span class="ma-status">waiting on a response</span></p>
+    {% endif %}
+  </div>
   {% endfor %}
-  <p class="fw-semibold">Total Credits Obtained: {{ total_credits }}</p>
-  <a class="btn btn-outline-secondary" href="{{ url_for('user_home_view') }}">Back</a>
+{% endif %}
+
+{% for group in groups %}
+  <details class="ma-year" open>
+    <summary>
+      <span class="material-symbols-outlined ma-chevron">expand_more</span>
+      <span class="ma-year-title">Year {{ group.year }}</span>
+    </summary>
+    {% for semester in group.semesters %}
+    <div class="ma-semester">
+      <div class="ma-semester-head">
+        <span class="fw-semibold">Semester {{ semester.label }}</span>
+        <span class="text-muted ms-auto">
+          Credits Obtained: {% if semester.credits is none %}N/A{% else %}{{ semester.credits }}{% endif %}
+        </span>
+      </div>
+      <table class="table ma-course-table align-middle">
+        <thead>
+          <tr>
+            <th>Course code</th>
+            <th>Course name</th>
+            <th class="col-credits">Credits</th>
+            <th class="col-type">Course type</th>
+            <th class="col-level">Level</th>
+            <th class="col-status">Status</th>
+            <th class="col-status">Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in semester.rows %}
+          <tr>
+            <td>{{ row.code }}</td>
+            <td>{{ row.name }}</td>
+            <td class="col-credits">{{ row.credits }}</td>
+            <td class="col-type">{{ row.type }}</td>
+            <td class="col-level">{{ row.level }}</td>
+            <td class="col-status"><span class="ma-status">{{ row.status }}</span></td>
+            <td class="col-status">
+              {% if row.decision %}<span class="ma-status">{{ row.decision }}</span>{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="text-muted">No courses added for this semester.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+  </details>
+  {% endfor %}
+
+  <div class="d-flex flex-wrap gap-2 mt-4">
+    <a class="btn btn-outline-secondary" href="{{ url_for('my_plans_view') }}">Back</a>
+    {% if can_continue %}
+    <a class="btn btn-ma-primary"
+       href="{{ url_for('plan_continue_view').include_query_params(plan_id=plan.plan_id, to=continue_to) }}">Continue Plan</a>
+    {% endif %}
+    {% if can_query %}
+    <a class="btn btn-outline-secondary"
+       href="{{ url_for('plan_query_view').include_query_params(plan_id=plan.plan_id) }}">Query</a>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
